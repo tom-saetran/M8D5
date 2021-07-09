@@ -2,7 +2,7 @@ export interface Accommodation {
     name: string
     description: string
     maxGuest: number
-    location: Location
+    location: string
 }
 
 export interface Location {

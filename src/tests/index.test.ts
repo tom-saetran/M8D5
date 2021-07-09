@@ -3,7 +3,7 @@ import server from "../server"
 import mongoose from "mongoose"
 import dotenv from "dotenv"
 import { response } from "express"
-import { Accommodation } from "../interfaces"
+import { Accommodation, Location } from "../interfaces"
 
 dotenv.config()
 const request = supertest(server)
@@ -11,30 +11,37 @@ const request = supertest(server)
 const { ATLAS_TEST_URL } = process.env
 
 describe("All Routes", () => {
-    const validEntry: Accommodation = {
+    let validAccomodationID = ""
+    let validLocationID = ""
+
+    const validAccomodationEntry: Accommodation = {
         name: "Test Entry",
         description: "Test Description",
-        location: { city: "Test City" },
+        location: validLocationID,
         maxGuest: 420
     }
-
-    const invalidEntry = {
+    const invalidAccomodationEntry = {
         description: true,
         location: { city: 5 },
         maxGuest: "420"
     }
+    const modifiedAccomodationEntry = { name: "Modifed Name" }
 
-    const modifiedEntry = { name: "Modifed Name" }
-    let validID = ""
+    const validDestinationEntry: Location = { city: "Test City" }
+    const invalidDestinationEntry = { city: true }
+    const modifiedDestinationEntry = { city: "Modifed City" }
 
-    beforeAll(done => {
-        mongoose.connect(ATLAS_TEST_URL! + "/discard", { useNewUrlParser: true, useUnifiedTopology: true }).then(() => done())
+    beforeAll(async () => {
+        mongoose.connect(ATLAS_TEST_URL! + "/discard", { useNewUrlParser: true, useUnifiedTopology: true })
+        const location = await request.post("/destinations").send(validDestinationEntry)
+        validLocationID = location.body._id
     })
 
     // ROUTE ACCOMODATION
     // GET ALL
     // Expect list of all accomodation
     // 200 OK
+
     it("should test that GET /accomodation returns 200", async () => {
         const response = await request.get("/accomodation")
         expect(response.status).toBe(200)
@@ -45,16 +52,17 @@ describe("All Routes", () => {
     // expect post a new accomodation
     // 400 if invalid data
     // 201 Created
+
     it("should test that POST /accomodation returns 201 on valid data", async () => {
-        const response = await request.post("/users").send(validEntry)
+        const response = await request.post("/accomodation").send(validAccomodationEntry)
 
         expect(response.status).toBe(201)
         expect(typeof response.body._id).toBe("string")
     })
 
     it("should test that POST /accomodation returns 400 on invalid data", async () => {
-        const responseA = await request.post("/users").send(invalidEntry)
-        const responseB = await request.post("/users").send({})
+        const responseA = await request.post("/accomodation").send(invalidAccomodationEntry)
+        const responseB = await request.post("/accomodation").send({})
 
         expect(responseA.status).toBe(400)
         expect(responseB.status).toBe(400)
@@ -66,27 +74,25 @@ describe("All Routes", () => {
     // 400 invalid format
     // 404 not found
 
-    // POST => GET ID => PUT WITH ID => TEST PASS
-
     it("should test that PUT /accomodation returns 200 on valid entry", async () => {
-        const response = await request.put(`accommodation/${validID}`).send(modifiedEntry)
+        const response = await request.put(`/accommodation/${validAccomodationID}`).send(modifiedAccomodationEntry)
 
         expect(response.status).toBe(200)
         expect(response.body.name).toBe("Modified Name")
     })
 
     it("should test that PUT /accomodation returns 400 on invalid entry", async () => {
-        const response = await request.post(`accommodation/${validID}`).send(invalidEntry)
+        const response = await request.put(`/accommodation/${validAccomodationID}`).send(invalidAccomodationEntry)
         expect(response.status).toBe(400)
     })
 
     it("should test that PUT /accomodation returns 400 on invalid id", async () => {
-        const response = await request.post(`accommodation/VOIDVOIDVOID`).send(modifiedEntry)
+        const response = await request.put(`/accommodation/VOIDVOIDVOID`).send(modifiedAccomodationEntry)
         expect(response.status).toBe(400)
     })
 
     it("should test that PUT /accomodation returns 404 on not found", async () => {
-        const response = await request.post("/accommodation/60bc1808ae33b80015046cc5").send(modifiedEntry)
+        const response = await request.put("/accommodation/60bc1808ae33b80015046cc5").send(modifiedAccomodationEntry)
         expect(response.status).toBe(404)
     })
 
@@ -96,7 +102,7 @@ describe("All Routes", () => {
     // 404 not found
 
     it("should test that GET /accomodation returns 200 on valid entry", async () => {
-        const response = await request.get("/accommodation/" + validID)
+        const response = await request.get(`/accommodation/${validAccomodationID}`)
         expect(response.status).toBe(200)
         expect(typeof response.body._id).toBe("string")
     })
@@ -117,7 +123,7 @@ describe("All Routes", () => {
     // 404 not found
 
     it("should test that DELETE /accomodation returns 204 on valid entry", async () => {
-        const response = await request.delete("/accommodation/" + validID)
+        const response = await request.delete(`/accommodation/${validAccomodationID}`)
         expect(response.status).toBe(204)
     })
 
@@ -136,10 +142,31 @@ describe("All Routes", () => {
     // Expect list of all accomodation
     // 200 OK
 
+    it("should test that GET /destinations returns 200", async () => {
+        const response = await request.get("/destinations")
+        expect(response.status).toBe(200)
+        expect(response.body.result.length).toBe(1)
+    })
+
     // POST
     // expect post a new accomodation
     // 400 if invalid data
     // 201 Created
+
+    it("should test that POST /destination returns 201 on valid data", async () => {
+        const response = await request.post("/destination").send(validDestinationEntry)
+
+        expect(response.status).toBe(201)
+        expect(typeof response.body._id).toBe("string")
+    })
+
+    it("should test that POST /destination returns 400 on invalid data", async () => {
+        const responseA = await request.post("/destination").send(invalidDestinationEntry)
+        const responseB = await request.post("/destination").send({})
+
+        expect(responseA.status).toBe(400)
+        expect(responseB.status).toBe(400)
+    })
 
     // PUT:ID
     // expect edit of accomodation
@@ -147,58 +174,67 @@ describe("All Routes", () => {
     // 400 invalid format
     // 404 not found
 
+    it("should test that PUT /destinations returns 200 on valid entry", async () => {
+        const response = await request.put(`/destinations/${validAccomodationID}`).send(modifiedDestinationEntry)
+        expect(response.status).toBe(200)
+        expect(response.body.name).toBe("Modified Name")
+    })
+
+    it("should test that PUT /destinations returns 400 on invalid entry", async () => {
+        const response = await request.put(`/destinations/${validAccomodationID}`).send(invalidAccomodationEntry)
+        expect(response.status).toBe(400)
+    })
+
+    it("should test that PUT /destinations returns 400 on invalid id", async () => {
+        const response = await request.put(`/destinations/VOIDVOIDVOID`).send(modifiedDestinationEntry)
+        expect(response.status).toBe(400)
+    })
+
+    it("should test that PUT /destinations returns 404 on not found", async () => {
+        const response = await request.put("/destinations/60bc1808ae33b80015046cc5").send(modifiedDestinationEntry)
+        expect(response.status).toBe(404)
+    })
+
     // GET:ID
     // 200 ok
     // 400 invalid format
     // 404 not found
+
+    it("should test that GET /destinations returns 200 on valid entry", async () => {
+        const response = await request.get("/destinations/" + validAccomodationID)
+        expect(response.status).toBe(200)
+        expect(typeof response.body._id).toBe("string")
+    })
+
+    it("should test that GET /destinations returns 400 on invalid id", async () => {
+        const response = await request.get("/destinations/VOIDVOIDVOID")
+        expect(response.status).toBe(400)
+    })
+
+    it("should test that GET /destinations returns 404 on id not found", async () => {
+        const response = await request.get("/destinations/60bc1808ae33b80015046cc5")
+        expect(response.status).toBe(404)
+    })
 
     // DEL:ID
     // 204 Gone
     // 400 invalid format
     // 404 not found
 
-    /*
-    // POST /users
-
-    const validUser = {
-        username: "John"
-    }
-
-    it("should test that we can POST a new user", async () => {
-        const response = await request.post("/users").send(validUser)
-
-        expect(response.status).toBe(201)
-        expect(typeof response.body._id).toBe("string")
-    })
-
-    // GET /users/:id
-
-    it("should test that we can GET a user with the given id", async () => {
-        const newUserResponse = await request.post("/users").send(validUser)
-
-        const { _id } = newUserResponse.body
-
-        const response = await request.get(`/users/${_id}`)
-
-        expect(response.status).toBe(200)
-        expect(response.body.username).toBe(validUser.username)
-    })
-
-    // DELETE /users/:id
-
-    it("should test that we can DELETE a user with a given id", async () => {
-        const newUserResponse = await request.post("/users").send(validUser)
-
-        const { _id } = newUserResponse.body
-
-        const response = await request.del(`/users/${_id}`)
-
+    it("should test that DELETE /destinations returns 204 on valid entry", async () => {
+        const response = await request.delete("/destinations/" + validAccomodationID)
         expect(response.status).toBe(204)
+    })
 
-        const getResponse = await request.get(`/users/${_id}`)
+    it("should test that DELETE /destinations returns 400 on invalid id", async () => {
+        const response = await request.delete("/destinations/VOIDVOIDVOID")
+        expect(response.status).toBe(400)
+    })
 
-        expect(getResponse.status).toBe(404)
-    })*/
+    it("should test that DELETE /destinations returns 404 on id not found", async () => {
+        const response = await request.delete("/destinations/60bc1808ae33b80015046cc5")
+        expect(response.status).toBe(404)
+    })
 
     afterAll(done => {
         mongoose.connection.dropDatabase().then(() => {
