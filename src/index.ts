@@ -12,7 +12,7 @@ mongoose
     .connect(ATLAS_URL, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
         server.listen(port, () => {
-            console.log(list(server))
+            console.table(list(server))
             console.log("Server listening on port", port)
         })
     })

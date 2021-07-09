@@ -2,7 +2,7 @@ import mongoose from "mongoose"
 
 const { Schema, model } = mongoose
 
-const accomodationSchema = new Schema(
+const accommodationSchema = new Schema(
     {
         name: { type: String, required: true },
         description: { type: String, required: true },
@@ -12,4 +12,4 @@ const accomodationSchema = new Schema(
     { timestamps: true }
 )
 
-export default model("Accomodation", accomodationSchema)
+export default model("Accomodation", accommodationSchema)
