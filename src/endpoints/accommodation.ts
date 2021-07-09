@@ -19,7 +19,7 @@ accommodationRoute.post("/", async (req, res, next) => {
         const result = new AccommodationModel(req.body)
 
         if (await result.save()) {
-            res.status(201).send(result._id)
+            res.status(201).send(result)
             console.log("MY ID SAVED", result._id)
         } else next(createError(400, "Error saving data!"))
     } catch (error) {
@@ -61,6 +61,8 @@ accommodationRoute.put("/:id", async (req, res, next) => {
 
 accommodationRoute.delete("/:id", async (req, res, next) => {
     try {
+        //console.log(req)
+
         let result
         if (!isValidObjectId(req.params.id)) next(createError(400, `ID ${req.params.id} is invalid`))
         else result = await AccommodationModel.findByIdAndDelete(req.params.id)

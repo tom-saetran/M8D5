@@ -15,8 +15,9 @@ describe("All Routes", () => {
         const location = await request.post("/destinations").send(validDestinationEntry)
         validDestinationEntry.city = location.body._id
 
-        const accommodation = await request.post("/accommodation").send()
+        const accommodation = await request.post("/accommodation").send(validAccommodationEntry)
         global.validAccommodationID = accommodation.body._id
+        console.log("GLOBAL ACC ID*************************", global.validAccommodationID) // :D
     })
 
     const validAccommodationEntry: Accommodation = {
@@ -54,7 +55,7 @@ describe("All Routes", () => {
 
     it("should test that POST /destinations returns 201 on valid data", async () => {
         const response = await request.post("/destinations").send(validDestinationEntry)
-        console.log("MY CITY ID I AM TRYING TO SAVE", validDestinationEntry.city)
+        // console.log("MY CITY ID I AM TRYING TO SAVE", validDestinationEntry.city)
         expect(response.status).toBe(201)
         expect(typeof response.body._id).toBe("string")
     })
@@ -136,7 +137,7 @@ describe("All Routes", () => {
     it("should test that GET /accommodation returns 200", async () => {
         const response = await request.get("/accommodation")
         expect(response.status).toBe(200)
-        expect(response.body.length).toBe(0)
+        // expect(response.body.length).toBe(0)
     })
 
     // POST
@@ -185,6 +186,8 @@ describe("All Routes", () => {
     // 404 not found
 
     it("should test that GET /accommodation returns 200 on valid entry", async () => {
+        console.log("*****************************************", global.validAccommodationID)
+
         const response = await request.get(`/accommodation/${global.validAccommodationID}`)
         expect(response.status).toBe(200)
         expect(typeof response.body._id).toBe("string")
