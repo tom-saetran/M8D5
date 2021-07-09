@@ -54,7 +54,7 @@ describe("All Routes", () => {
 
     it("should test that POST /destinations returns 201 on valid data", async () => {
         const response = await request.post("/destinations").send(validDestinationEntry)
-
+        console.log("MY CITY ID I AM TRYING TO SAVE", validDestinationEntry.city)
         expect(response.status).toBe(201)
         expect(typeof response.body._id).toBe("string")
     })
@@ -92,6 +92,8 @@ describe("All Routes", () => {
 
     it("should test that GET /destinations returns 200 on valid entry", async () => {
         const response = await request.get(`/destinations/${validDestinationEntry.city}`)
+        console.log("MY CITY ID I AM TRYING TO GET", validDestinationEntry.city)
+
         expect(response.status).toBe(200)
         expect(typeof response.body._id).toBe("string")
     })
