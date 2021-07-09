@@ -22,7 +22,7 @@ describe("All Routes", () => {
     const validAccommodationEntry: Accommodation = {
         name: "Test Entry",
         description: "Test Description",
-        location: "",
+        location: "60bc1808ae33b80015046cc5",
         maxGuests: 666
     }
     const invalidAccommodationEntry = {
@@ -143,13 +143,9 @@ describe("All Routes", () => {
     // 201 Created
 
     it("should test that POST /accommodation returns 201 on valid data", async () => {
-        const location = await request.post("/destinations").send(validDestinationEntry)
-        validDestinationEntry.city = location.body._id
-
         const response = await request.post("/accommodation").send(validAccommodationEntry)
+        global.validAccommodationID = response.body._id // <= doesnt work :(
         expect(response.status).toBe(201)
-
-        validAccommodationID = response.body._id
     })
 
     it("should test that POST /accommodation returns 400 on invalid data", async () => {
@@ -167,7 +163,7 @@ describe("All Routes", () => {
     // 404 not found
 
     it("should test that PUT /accommodation returns 200 on valid entry", async () => {
-        const response = await request.put(`/accommodation/${validAccommodationID}`).send(modifiedAccommodationEntry)
+        const response = await request.put(`/accommodation/${global.validAccommodationID}`).send(modifiedAccommodationEntry)
         expect(response.status).toBe(200)
     })
 
@@ -187,7 +183,7 @@ describe("All Routes", () => {
     // 404 not found
 
     it("should test that GET /accommodation returns 200 on valid entry", async () => {
-        const response = await request.get(`/accommodation/${validAccommodationID}`)
+        const response = await request.get(`/accommodation/${global.validAccommodationID}`)
         expect(response.status).toBe(200)
         expect(typeof response.body._id).toBe("string")
     })
@@ -208,7 +204,7 @@ describe("All Routes", () => {
     // 404 not found
 
     it("should test that DELETE /accommodation returns 204 on valid entry", async () => {
-        const response = await request.delete(`/accommodation/${validAccommodationID}`)
+        const response = await request.delete(`/accommodation/${global.validAccommodationID}`)
         expect(response.status).toBe(204)
         console.log(validAccommodationID)
     })
