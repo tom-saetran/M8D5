@@ -22,7 +22,7 @@ destinationsRoute.post("/", async (req, res, next) => {
         if (await result.save()) res.status(201).send(result)
         else next(createError(400, "Error saving data!"))
     } catch (error) {
-        next(error)
+        next(createError(400, error))
     }
 })
 

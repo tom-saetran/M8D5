@@ -16,12 +16,14 @@ accommodationRoute.get("/", async (req, res, next) => {
 
 accommodationRoute.post("/", async (req, res, next) => {
     try {
+        console.log(req.body)
         const result = new AccommodationModel(req.body)
+        // console.log("NEW ACC", result)
 
         if (await result.save()) res.status(201).send(result._id)
         else next(createError(400, "Error saving data!"))
     } catch (error) {
-        next(error)
+        next(createError(400, error))
     }
 })
 
