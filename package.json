@@ -13,7 +13,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@types/express-list-endpoints": "^4.0.1",
+        "@types/express-list-endpoints": "^6.0.0",
         "@types/http-errors": "^1.8.1",
         "@types/node": "^16.6.2",
         "cors": "^2.8.5",
